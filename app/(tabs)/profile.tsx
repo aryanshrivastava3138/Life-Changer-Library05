@@ -58,7 +58,7 @@ export default function ProfileScreen() {
         <View style={styles.profileIcon}>
           <User size={32} color="#2563EB" />
         </View>
-        <Text style={styles.name}>{user?.full_name}</Text>
+        <Text style={styles.name}>{user?.fullName}</Text>
         <Text style={styles.email}>{user?.email}</Text>
         {user?.role === 'admin' && (
           <View style={styles.adminBadge}>
@@ -73,7 +73,7 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Profile Information</Text>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Full Name</Text>
-          <Text style={styles.infoValue}>{user?.full_name}</Text>
+          <Text style={styles.infoValue}>{user?.fullName}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Email</Text>
@@ -81,7 +81,7 @@ export default function ProfileScreen() {
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Mobile Number</Text>
-          <Text style={styles.infoValue}>{user?.mobile_number}</Text>
+          <Text style={styles.infoValue}>{user?.mobileNumber}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Member Since</Text>

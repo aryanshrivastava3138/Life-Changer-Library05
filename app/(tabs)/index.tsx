@@ -123,7 +123,7 @@ export default function HomeScreen() {
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.greeting}>Account Status</Text>
-          <Text style={styles.name}>{user?.full_name}</Text>
+          <Text style={styles.name}>{user?.fullName}</Text>
           <Text style={styles.subtitle}>Life Changer Library</Text>
         </View>
 
@@ -145,7 +145,7 @@ export default function HomeScreen() {
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.greeting}>Welcome,</Text>
-          <Text style={styles.name}>{user?.full_name}</Text>
+          <Text style={styles.name}>{user?.fullName}</Text>
           <Text style={styles.subtitle}>Life Changer Library</Text>
         </View>
 
@@ -169,7 +169,7 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.greeting}>Welcome back,</Text>
-        <Text style={styles.name}>{user?.full_name}</Text>
+        <Text style={styles.name}>{user?.fullName}</Text>
         <Text style={styles.subtitle}>Life Changer Library</Text>
       </View>
 

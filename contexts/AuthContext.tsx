@@ -43,11 +43,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (firebaseUser) {
         try {
           // Fetch user profile from Firestore
-          const userProfile = await UserService.getUserById(firebaseUser.uid);
-          if (userProfile) {
-            setUser(userProfile as User);
-          } else {
-            // User exists in Auth but not in Firestore, sign them out
+          try {
+            const userProfile = await UserService.getUserById(firebaseUser.uid);
+            if (userProfile) {
+              setUser(userProfile as User);
+            } else {
+              // User exists in Auth but not in Firestore, sign them out
+              await firebaseSignOut(auth);
+              setUser(null);
+            }
+          } catch (firestoreError: any) {
+            console.error('Firestore connection error:', firestoreError);
+            if (firestoreError.message?.includes('offline') || firestoreError.code === 'unavailable') {
+              console.error(`
+🔥 FIRESTORE DATABASE NOT ACCESSIBLE:
+
+The Firestore database cannot be reached. This usually means:
+1. The Firestore database hasn't been created in your Firebase project
+2. Network connectivity issues
+3. Incorrect Firebase configuration
+
+TO FIX THIS:
+1. Go to Firebase Console: https://console.firebase.google.com
+2. Select your project: life-changer-library-01
+3. Navigate to Firestore Database
+4. Create a database if it doesn't exist
+5. Restart your development server
+              `);
+            }
+            // Sign out user if Firestore is not accessible
             await firebaseSignOut(auth);
             setUser(null);
           }
@@ -83,9 +107,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
       
       // Fetch user profile
-      const userProfile = await UserService.getUserById(userCredential.user.uid);
-      if (!userProfile) {
-        return { error: 'User profile not found. Please contact support.' };
+      try {
+        const userProfile = await UserService.getUserById(userCredential.user.uid);
+        if (!userProfile) {
+          return { error: 'User profile not found. Please contact support.' };
+        }
+      } catch (firestoreError: any) {
+        console.error('Firestore error during sign in:', firestoreError);
+        if (firestoreError.message?.includes('offline') || firestoreError.code === 'unavailable') {
+          return { error: 'Database connection failed. Please check your internet connection and try again.' };
+        }
+        return { error: 'Unable to access user profile. Please try again later.' };
       }
 
       return {};
@@ -136,18 +168,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
       
       // Create user profile in Firestore
-      const userProfile = {
-        id: userCredential.user.uid,
-        email: trimmedEmail,
-        fullName: fullName.trim(),
-        mobileNumber: mobileNumber.trim(),
-        role: 'student' as const,
-        approvalStatus: 'pending' as const,
-      };
+      try {
+        const userProfile = {
+          id: userCredential.user.uid,
+          email: trimmedEmail,
+          fullName: fullName.trim(),
+          mobileNumber: mobileNumber.trim(),
+          role: 'student' as const,
+          approvalStatus: 'approved' as const,
+          approvedBy: 'system',
+          approvedAt: new Date(),
+        };
 
-      await UserService.createUser(userProfile);
+        await UserService.createUser(userProfile);
+        console.log('User created successfully');
+      } catch (firestoreError: any) {
+        console.error('Firestore error during user creation:', firestoreError);
+        
+        // Delete the Firebase Auth user if Firestore creation fails
+        try {
+          await userCredential.user.delete();
+        } catch (deleteError) {
+          console.error('Error cleaning up Firebase Auth user:', deleteError);
+        }
+        
+        if (firestoreError.message?.includes('offline') || firestoreError.code === 'unavailable') {
+          return { error: 'Database connection failed. Please check your internet connection and try again.' };
+        }
+        return { error: 'Failed to create user profile. Please try again later.' };
+      }
 
-      console.log('User created successfully');
       return {};
 
     } catch (error: any) {
