@@ -86,7 +86,7 @@ export default function AdminStudentsScreen() {
       await UserService.updateUser(studentId, {
         approvalStatus: status,
         approvedBy: user?.id,
-        approvedAt: new Date()
+        approvedAt: new Date().toISOString()
       });
 
       // Log admin action
@@ -101,11 +101,10 @@ export default function AdminStudentsScreen() {
       await NotificationService.createNotification({
         userId: studentId,
         title: `Account ${status === 'approved' ? 'Approved' : 'Rejected'}`,
-        body: status === 'approved' 
+        message: status === 'approved' 
           ? 'Your account has been approved! You can now book seats and use library services.'
           : 'Your account application has been rejected. Please contact the library for more information.',
         type: status === 'approved' ? 'success' : 'error',
-        isRead: false,
         createdBy: user?.id
       });
 
