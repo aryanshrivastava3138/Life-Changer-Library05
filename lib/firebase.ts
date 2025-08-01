@@ -1,6 +1,7 @@
 import { 
   collection, 
   doc, 
+  setDoc,
   addDoc, 
   updateDoc, 
   deleteDoc, 
@@ -195,6 +196,21 @@ export class FirebaseService {
 
 // User-specific operations
 export class UserService extends FirebaseService {
+  static async createUserWithId(userId: string, userData: any) {
+    try {
+      const docRef = doc(db, COLLECTIONS.USERS, userId);
+      await setDoc(docRef, {
+        ...userData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return { id: userId, ...userData };
+    } catch (error) {
+      console.error(`Error creating user with ID ${userId}:`, error);
+      throw error;
+    }
+  }
+
   static async createUser(userData: any) {
     return this.create(COLLECTIONS.USERS, userData);
   }
@@ -223,7 +239,7 @@ export class AdmissionService extends FirebaseService {
   }
 
   static async getUserAdmissions(userId: string) {
-    return this.getWhere(COLLECTIONS.ADMISSIONS, 'userId', '==', userId, 'createdAt');
+    return this.getWhere(COLLECTIONS.ADMISSIONS, 'userId', '==', userId);
   }
 
   static async updateAdmission(admissionId: string, admissionData: any) {

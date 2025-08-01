@@ -30,6 +30,7 @@ interface AttendanceStatus {
 
 export default function AttendanceScreen() {
   const { user } = useAuth();
+  const [admission, setAdmission] = useState<any | null>(null);
   const [todayAttendance, setTodayAttendance] = useState<any[]>([]);
   const [recentAttendance, setRecentAttendance] = useState<any[]>([]);
   const [attendanceStatus, setAttendanceStatus] = useState<AttendanceStatus[]>([]);
@@ -66,6 +67,12 @@ export default function AttendanceScreen() {
     if (!user) return;
 
     try {
+      // Fetch admission data - get the most recent admission
+      const admissionData = await AdmissionService.getUserAdmissions(user.id);
+      if (admissionData && admissionData.length > 0) {
+        setAdmission(admissionData[0]);
+      }
+
       // Fetch today's attendance
       const todayData = await AttendanceService.getUserAttendance(user.id, today);
 

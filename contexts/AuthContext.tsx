@@ -45,9 +45,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Fetch user profile from Firestore
           try {
             const userProfile = await UserService.getUserById(firebaseUser.uid);
+            console.log('Fetched user profile:', userProfile);
             if (userProfile) {
               setUser(userProfile as User);
             } else {
+              console.log('User profile not found in Firestore for UID:', firebaseUser.uid);
               // User exists in Auth but not in Firestore, sign them out
               await firebaseSignOut(auth);
               setUser(null);
@@ -109,7 +111,9 @@ TO FIX THIS:
       // Fetch user profile
       try {
         const userProfile = await UserService.getUserById(userCredential.user.uid);
+        console.log('Login - fetched user profile:', userProfile);
         if (!userProfile) {
+          console.log('Login - user profile not found for UID:', userCredential.user.uid);
           return { error: 'User profile not found. Please contact support.' };
         }
       } catch (firestoreError: any) {
@@ -178,9 +182,12 @@ TO FIX THIS:
           approvalStatus: 'approved' as const,
           approvedBy: 'system',
           approvedAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date()
         };
 
-        await UserService.createUser(userProfile);
+        // Create user document with the user's UID as the document ID
+        await UserService.createUserWithId(userCredential.user.uid, userProfile);
         console.log('User created successfully');
       } catch (firestoreError: any) {
         console.error('Firestore error during user creation:', firestoreError);
