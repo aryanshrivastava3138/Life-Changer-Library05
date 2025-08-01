@@ -326,7 +326,14 @@ export class PaymentService extends FirebaseService {
   }
 
   static async getUserPayments(userId: string) {
-    return this.getWhere(COLLECTIONS.PAYMENTS, 'userId', '==', userId, 'createdAt');
+    try {
+      // Use getAll and filter client-side to avoid composite index requirement
+      const allPayments = await this.getAll(COLLECTIONS.PAYMENTS, 'createdAt');
+      return allPayments.filter(payment => payment.userId === userId);
+    } catch (error) {
+      console.error('Error getting user payments:', error);
+      throw error;
+    }
   }
 
   static async updatePayment(paymentId: string, paymentData: any) {
