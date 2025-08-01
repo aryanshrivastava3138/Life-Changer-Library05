@@ -101,10 +101,11 @@ export default function AdminStudentsScreen() {
       await NotificationService.createNotification({
         userId: studentId,
         title: `Account ${status === 'approved' ? 'Approved' : 'Rejected'}`,
-        message: status === 'approved' 
+        body: status === 'approved' 
           ? 'Your account has been approved! You can now book seats and use library services.'
           : 'Your account application has been rejected. Please contact the library for more information.',
         type: status === 'approved' ? 'success' : 'error',
+        isRead: false,
         createdBy: user?.id
       });
 
