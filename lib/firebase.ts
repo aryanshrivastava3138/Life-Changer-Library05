@@ -224,11 +224,13 @@ export class UserService extends FirebaseService {
   }
 
   static async getUsersByRole(role: string) {
-    return this.getWhere(COLLECTIONS.USERS, 'role', '==', role, 'createdAt');
+    const users = await this.getWhere(COLLECTIONS.USERS, 'role', '==', role);
+    return users.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   static async getUsersByApprovalStatus(status: string) {
-    return this.getWhere(COLLECTIONS.USERS, 'approvalStatus', '==', status, 'createdAt');
+    const users = await this.getWhere(COLLECTIONS.USERS, 'approvalStatus', '==', status);
+    return users.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 }
 
@@ -332,7 +334,8 @@ export class PaymentService extends FirebaseService {
   }
 
   static async getPaymentsByStatus(status: string) {
-    return this.getWhere(COLLECTIONS.PAYMENTS, 'status', '==', status, 'createdAt');
+    const payments = await this.getWhere(COLLECTIONS.PAYMENTS, 'status', '==', status);
+    return payments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 }
 

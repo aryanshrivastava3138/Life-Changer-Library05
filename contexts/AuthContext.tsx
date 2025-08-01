@@ -74,7 +74,11 @@ TO FIX THIS:
               `);
             }
             // Sign out user if Firestore is not accessible
-            await firebaseSignOut(auth);
+            try {
+              await firebaseSignOut(auth);
+            } catch (signOutError) {
+              console.error('Error signing out user:', signOutError);
+            }
             setUser(null);
           }
         } catch (error) {
@@ -179,9 +183,7 @@ TO FIX THIS:
           fullName: fullName.trim(),
           mobileNumber: mobileNumber.trim(),
           role: 'student' as const,
-          approvalStatus: 'approved' as const,
-          approvedBy: 'system',
-          approvedAt: new Date(),
+          approvalStatus: 'pending' as const,
           createdAt: new Date(),
           updatedAt: new Date()
         };

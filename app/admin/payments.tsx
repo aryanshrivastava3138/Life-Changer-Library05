@@ -35,7 +35,7 @@ export default function AdminPaymentsScreen() {
 
   const fetchCashPayments = async () => {
     try {
-      const payments = await PaymentService.getAllPayments();
+      const payments = await PaymentService.getAll(COLLECTIONS.PAYMENTS);
       
       const paymentsWithDetails = await Promise.all(
         payments.map(async (payment) => {

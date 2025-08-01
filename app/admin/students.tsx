@@ -50,9 +50,9 @@ export default function AdminStudentsScreen() {
     // Apply search filter
     if (searchQuery) {
       filtered = filtered.filter(student =>
-        student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        student.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        student.mobile_number.includes(searchQuery)
+        student.mobileNumber.includes(searchQuery)
       );
     }
 
