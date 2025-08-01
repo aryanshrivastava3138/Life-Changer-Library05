@@ -135,7 +135,7 @@ export default function BookingScreen() {
     return <LoadingSpinner />;
   }
 
-  if (user?.approval_status !== 'approved') {
+  if (user?.approvalStatus !== 'approved') {
     return (
       <View style={styles.container}>
         <Card style={styles.messageCard}>

@@ -99,6 +99,9 @@ export default function HomeScreen() {
   const isUserApproved = user?.approval_status === 'approved';
   const isUserPending = user?.approval_status === 'pending';
   const isUserRejected = user?.approval_status === 'rejected';
+  const isUserApproved = user?.approvalStatus === 'approved';
+  const isUserPending = user?.approvalStatus === 'pending';
+  const isUserRejected = user?.approvalStatus === 'rejected';
 
   const getAvailabilityColor = (availableSeats: number): string => {
     const percentage = (availableSeats / totalSeats) * 100;

@@ -2,18 +2,25 @@ import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, Alert, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { PaymentService, UserService, SeatBookingService, AdmissionService, NotificationService, AdminLogService } from '@/lib/firebase';
+import { PaymentService, UserService, SeatBookingService, AdmissionService, NotificationService, AdminLogService, COLLECTIONS } from '@/lib/firebase';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { Payment, User, SeatBooking, Admission } from '@/types/database';
 import { formatDate } from '@/utils/dateUtils';
 import { ArrowLeft, CircleCheck as CheckCircle, Circle as XCircle, Clock, Banknote, MapPin, Calendar, GraduationCap } from 'lucide-react-native';
 
-interface CashPaymentWithDetails extends Payment {
-  user: User;
-  booking?: SeatBooking;
-  admission?: Admission;
+interface CashPaymentWithDetails {
+  id: string;
+  userId: string;
+  amount: number;
+  status: string;
+  bookingId?: string;
+  admissionId?: string;
+  createdAt: any;
+  approvedAt?: any;
+  user: any;
+  booking?: any;
+  admission?: any;
 }
 
 export default function AdminPaymentsScreen() {
@@ -35,7 +42,7 @@ export default function AdminPaymentsScreen() {
 
   const fetchCashPayments = async () => {
     try {
-      const payments = await PaymentService.getAll(COLLECTIONS.PAYMENTS);
+      const payments = await PaymentService.getAll(COLLECTIONS.PAYMENTS, 'createdAt');
       
       const paymentsWithDetails = await Promise.all(
         payments.map(async (payment) => {
@@ -85,7 +92,7 @@ export default function AdminPaymentsScreen() {
       await PaymentService.updatePayment(paymentId, {
         status: action === 'approve' ? 'approved' : 'rejected',
         approvedBy: user?.id,
-        approvedAt: new Date()
+        approvedAt: new Date().toISOString()
       });
 
       if (action === 'approve') {
@@ -133,9 +140,7 @@ export default function AdminPaymentsScreen() {
           body: `Your cash payment of ₹${payment.amount} has been rejected. Please contact the library for more information.`,
           type: 'error',
           isRead: false,
-          createdBy: user?.id,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdBy: user?.id
         });
       }
 
@@ -148,9 +153,7 @@ export default function AdminPaymentsScreen() {
           amount: payment.amount,
           userName: payment.user?.fullName,
           paymentType: payment.bookingId ? 'booking' : 'admission'
-        },
-        createdAt: new Date(),
-        updatedAt: new Date()
+        }
       });
 
       // Send success notification to student if approved
@@ -161,9 +164,7 @@ export default function AdminPaymentsScreen() {
           body: `Your cash payment of ₹${payment.amount} has been approved. ${payment.bookingId ? 'Your seat booking is now confirmed.' : 'Your admission is now active.'}`,
           type: 'success',
           isRead: false,
-          createdBy: user?.id,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdBy: user?.id
         });
       }
 

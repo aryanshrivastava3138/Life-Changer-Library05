@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserService, NotificationService, AdminLogService } from '@/lib/firebase';
+import { UserService, NotificationService, AdminLogService, COLLECTIONS } from '@/lib/firebase';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -80,16 +80,18 @@ export default function AdminStudentsScreen() {
 
   const updateApprovalStatus = async (studentId: string, status: 'approved' | 'rejected') => {
     try {
+      console.log(`Updating student ${studentId} status to ${status}`);
+      
       // Update user approval status
       await UserService.updateUser(studentId, {
         approvalStatus: status,
         approvedBy: user?.id,
-        approvedAt: new Date().toISOString()
+        approvedAt: new Date()
       });
 
       // Log admin action
       await AdminLogService.createLog({
-        adminId: user?.id,
+        adminId: user?.id || '',
         action: `${status}_student_account`,
         targetUserId: studentId,
         details: { approvalStatus: status }
@@ -97,20 +99,21 @@ export default function AdminStudentsScreen() {
 
       // Send notification to student
       await NotificationService.createNotification({
-          userId: studentId,
-          title: `Account ${status === 'approved' ? 'Approved' : 'Rejected'}`,
-          message: status === 'approved' 
-            ? 'Your account has been approved! You can now book seats and use library services.'
-            : 'Your account application has been rejected. Please contact the library for more information.',
-          type: status === 'approved' ? 'success' : 'error',
-          createdBy: user?.id
-        });
+        userId: studentId,
+        title: `Account ${status === 'approved' ? 'Approved' : 'Rejected'}`,
+        body: status === 'approved' 
+          ? 'Your account has been approved! You can now book seats and use library services.'
+          : 'Your account application has been rejected. Please contact the library for more information.',
+        type: status === 'approved' ? 'success' : 'error',
+        isRead: false,
+        createdBy: user?.id
+      });
 
       Alert.alert('Success', `Student account ${status} successfully`);
       await fetchStudents();
     } catch (error) {
       console.error('Error updating approval status:', error);
-      Alert.alert('Error', 'Failed to update approval status');
+      Alert.alert('Error', `Failed to ${status} student account. Please try again.`);
     }
   };
 
@@ -256,14 +259,14 @@ export default function AdminStudentsScreen() {
                       title="Approve"
                       onPress={() => confirmApprovalAction(student, 'approved')}
                       size="small"
-                      style={[styles.actionButton, styles.approveButton]}
+                      style={styles.actionButton}
                     />
                     <Button
                       title="Reject"
                       onPress={() => confirmApprovalAction(student, 'rejected')}
                       size="small"
                       variant="danger"
-                      style={[styles.actionButton, styles.rejectButton]}
+                      style={styles.actionButton}
                     />
                   </View>
                 )}
@@ -427,11 +430,5 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-  },
-  approveButton: {
-    backgroundColor: '#10B981',
-  },
-  rejectButton: {
-    backgroundColor: '#EF4444',
   },
 });
